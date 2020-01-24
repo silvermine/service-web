@@ -7,7 +7,8 @@
    "module": "./dist/esm/index",
    "scripts": {
       "prepare": "grunt build",
-      "test": "TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts"
+      "test": "./node_modules/.bin/check-node-version --npm 6.13.4 && TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
+      "commitlint": "./node_modules/.bin/commitlint --from ac67b27"
    },
    "author": "Jeremy Thomerson",
    "license": "MIT",
@@ -35,6 +36,7 @@
       "@types/node": "12.12.25",
       "@types/sinon": "7.5.1",
       "chai": "4.2.0",
+      "check-node-version": "4.0.2",
       "coveralls": "3.0.9",
       "cz-conventional-changelog": "3.0.2",
       "grunt": "1.0.4",
