@@ -8,7 +8,8 @@
    "scripts": {
       "prepare": "grunt build",
       "test": "./node_modules/.bin/check-node-version --npm 6.13.4 && TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
-      "commitlint": "./node_modules/.bin/commitlint --from ac67b27"
+      "commitlint": "./node_modules/.bin/commitlint --from ac67b27",
+      "standards": "npm run commitlint && grunt standards"
    },
    "author": "Jeremy Thomerson",
    "license": "MIT",
