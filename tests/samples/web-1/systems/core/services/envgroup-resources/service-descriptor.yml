@@ -1,0 +1,6 @@
+name: envgroup-resources
+isRootDependency: true # all services implicitly depend on this service without listing it
+dependsOn:
+   - 'core:root-resources' # but this (also root) dependency must deploy first
+deployment:
+   target: all-regions

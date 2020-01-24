@@ -1,0 +1,5 @@
+name: search-api
+dependsOn:
+   - 'search:search-cluster'
+deployment:
+   target: all-regions

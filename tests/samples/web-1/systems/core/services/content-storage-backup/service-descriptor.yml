@@ -1,0 +1,5 @@
+name: content-storage-backup
+dependsOn:
+   - 'core:content-storage'
+deployment:
+   target: primary-and-backup-region

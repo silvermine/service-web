@@ -1,0 +1,4 @@
+name: root-resources
+isRootDependency: true # all services implicitly depend on this service without listing it
+deployment:
+   target: all-regions

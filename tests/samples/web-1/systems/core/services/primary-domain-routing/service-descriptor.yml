@@ -1,0 +1,3 @@
+name: primary-domain-routing
+deployment:
+   target: all-regions

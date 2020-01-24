@@ -1,0 +1,64 @@
+name: service-web-1
+systems:
+   - ./systems/*/system-descriptor.yml
+
+systemDefaults:
+   services:
+      - ./services/*/service-descriptor.yml
+   serviceDefaults:
+      type: serverless
+
+serviceTypes:
+   -
+      name: serverless
+      commands:
+         build: sls package --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}
+         deploy: sls deploy --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}
+   -
+      name: cdk
+      commands:
+         build: cdk synth
+         deploy: cdk deploy
+   -
+      name: custom
+      commands:
+         build: echo "No defined build process for custom service types" && exit 1
+         deploy: echo "No defined deployment process for custom service types" && exit 1
+
+deploymentTargets:
+   -
+      name: primary-region-only
+      targets:
+         dev:
+            - { region: us-east-1, environment: dev }
+         qa:
+            - { region: us-east-1, environment: qa }
+         prd:
+            - { region: us-east-1, environment: prd }
+   -
+      name: primary-and-backup-region
+      targets:
+         dev:
+            - { region: us-east-1, environment: dev }
+            - { region: eu-west-1, environment: dev }
+         qa:
+            - { region: us-east-1, environment: qa }
+            - { region: eu-west-1, environment: qa }
+         prd:
+            - { region: us-east-1, environment: prd }
+            - { region: eu-west-1, environment: prd }
+   -
+      name: all-regions
+      targets:
+         dev:
+            - { region: us-east-1, environment: dev }
+            - { region: us-west-2, environment: dev }
+            - { region: eu-west-1, environment: dev }
+         qa:
+            - { region: us-east-1, environment: qa }
+            - { region: us-west-2, environment: qa }
+            - { region: eu-west-1, environment: qa }
+         prd:
+            - { region: us-east-1, environment: prd }
+            - { region: us-west-2, environment: prd }
+            - { region: eu-west-1, environment: prd }

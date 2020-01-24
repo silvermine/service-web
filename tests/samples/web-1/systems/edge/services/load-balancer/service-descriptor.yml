@@ -1,0 +1,8 @@
+name: load-balancer
+dependsOn:
+   - 'cms:discovery-api'
+   - 'cms:downloads-api'
+   - 'cms:management-api'
+   - 'search:search-api'
+deployment:
+   target: all-regions
