@@ -9,22 +9,24 @@ module.exports = (grunt) => {
          gruntFile: 'Gruntfile.js',
          all: [
             './*.js',
-            './src/**/*.js',
-            './tests/**/*.js',
+            './*/*.js',
+            './*/src/**/*.js',
+            './*/tests/**/*.js',
          ],
       },
       ts: {
-         src: './src/**/*.ts',
+         src: './*/src/**/*.ts',
          all: [
             './*.ts',
-            './src/**/*.ts',
-            './tests/**/*.ts',
+            './*/*.ts',
+            './*/src/**/*.ts',
+            './*/tests/**/*.ts',
          ],
          configs: {
             standards: 'tsconfig.json',
-            commonjs: 'src/tsconfig.commonjs.json',
-            esm: 'src/tsconfig.esm.json',
-            types: 'src/tsconfig.types.json',
+            commonjs: '*/src/tsconfig.commonjs.json',
+            esm: '*/src/tsconfig.esm.json',
+            types: '*/src/tsconfig.types.json',
          },
       },
       commands: {
