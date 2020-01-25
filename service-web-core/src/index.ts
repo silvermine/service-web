@@ -1,5 +1,7 @@
-import Example from './Example';
+import ServiceWeb from './ServiceWeb';
+
+export default ServiceWeb;
 
 export {
-   Example,
+   ServiceWeb,
 };

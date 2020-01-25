@@ -24,9 +24,9 @@ module.exports = (grunt) => {
          ],
          configs: {
             standards: 'tsconfig.json',
-            commonjs: '*/src/tsconfig.commonjs.json',
-            esm: '*/src/tsconfig.esm.json',
-            types: '*/src/tsconfig.types.json',
+            commonjs: 'tsconfig.commonjs.json',
+            esm: 'tsconfig.esm.json',
+            types: 'tsconfig.types.json',
          },
       },
       commands: {
