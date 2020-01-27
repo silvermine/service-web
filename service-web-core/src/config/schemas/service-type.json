@@ -1,0 +1,28 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/service-type.json",
+   "title": "Service Type Config",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "object",
+
+   "required": [
+      "name",
+      "commands"
+   ],
+
+   "properties": {
+      "name": {
+         "$ref": "unit-name.json"
+      },
+      "commands": {
+         "type": "object",
+         "patternProperties": {
+            ".*": {
+               "type": "string",
+               "minLength": 1
+            }
+         }
+      }
+   }
+
+}

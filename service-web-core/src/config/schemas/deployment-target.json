@@ -1,0 +1,24 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/deployment-target.json",
+   "title": "Deployment Target Config",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "object",
+
+   "required": [
+      "region",
+      "environment"
+   ],
+
+   "properties": {
+      "region": {
+         "type": "string",
+         "minLength": 1
+      },
+      "environment": {
+         "type": "string",
+         "minLength": 1
+      }
+   }
+
+}

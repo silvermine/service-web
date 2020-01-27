@@ -1,0 +1,11 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/unit-name.json",
+   "title": "Unit Name",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "string",
+   "minLength": 1,
+   "$comment": "This pattern is duplicated in `dependsOn` of service and must be kept in sync",
+   "pattern": "^[A-Za-z0-9_-]+$"
+
+}

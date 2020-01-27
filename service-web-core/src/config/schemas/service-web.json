@@ -1,0 +1,42 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/service-web.json",
+   "title": "Service Web Config",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "object",
+
+   "required": [
+      "name",
+      "systems",
+      "deploymentTargets"
+   ],
+
+   "properties": {
+      "name": {
+         "$ref": "unit-name.json"
+      },
+      "systems": {
+         "type": "array",
+         "items": {
+            "type": "string",
+            "minLength": 1
+         }
+      },
+      "systemDefaults": {
+         "$ref": "system.json"
+      },
+      "serviceTypes": {
+         "type": "array",
+         "items": {
+            "$ref": "service-type.json"
+         }
+      },
+      "deploymentTargets": {
+         "type": "array",
+         "items": {
+            "$ref": "named-deployment-targets.json"
+         }
+      }
+   }
+
+}

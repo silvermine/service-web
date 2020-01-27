@@ -1,0 +1,36 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/service.json",
+   "title": "Service Config",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "object",
+
+   "properties": {
+      "name": {
+         "$ref": "unit-name.json"
+      },
+      "deployment": {
+         "type": "object",
+         "required": [ "target" ],
+         "properties": {
+            "target": {
+               "type": "string",
+               "minLength": 1
+            }
+         }
+      },
+      "isRootDependency": {
+         "type": "boolean",
+         "default": false
+      },
+      "dependsOn": {
+         "type": "array",
+         "items": {
+            "type": "string",
+            "minLength": 3,
+            "$comment": "This pattern originates from unit-name and must be kept in sync",
+            "pattern": "^[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$"
+         }
+      }
+   }
+}

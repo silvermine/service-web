@@ -1,0 +1,32 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/named-deployment-targets.json",
+   "title": "Named Deployment Targets Config",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "object",
+
+   "required": [
+      "name",
+      "targets"
+   ],
+
+   "properties": {
+      "name": {
+         "type": "string",
+         "minLength": 1
+      },
+      "targets": {
+         "type": "object",
+         "$comment": "TODO: make sure there's at least one property",
+         "patternProperties": {
+            ".*": {
+               "type": "array",
+               "items": {
+                  "$ref": "deployment-target.json"
+               }
+            }
+         }
+      }
+   }
+
+}
