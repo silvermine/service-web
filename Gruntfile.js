@@ -29,6 +29,9 @@ module.exports = (grunt) => {
             types: 'tsconfig.types.json',
          },
       },
+      schemas: {
+         config: './service-web-core/src/config/schemas',
+      },
       commands: {
          tsc: './node_modules/.bin/tsc',
       },
@@ -79,6 +82,15 @@ module.exports = (grunt) => {
          'build-ts-outputs': [ 'build-types', 'build-esm', 'build-commonjs' ],
       },
 
+      'build-types-from-json-schemas': {
+         config: {
+            cwd: config.schemas.config,
+            files: {
+               [`${config.schemas.config}/auto-generated-types.d.ts`]: `${config.schemas.config}/service-web.json`,
+            },
+         },
+      },
+
       watch: {
          ts: {
             files: [ config.ts.src ],
@@ -98,6 +110,9 @@ module.exports = (grunt) => {
    grunt.loadNpmTasks('grunt-contrib-clean');
    grunt.loadNpmTasks('grunt-concurrent');
    grunt.loadNpmTasks('grunt-contrib-watch');
+
+   // our custom tasks
+   grunt.loadTasks('grunt-tasks');
 
    grunt.registerTask('standards', [ 'eslint:target', 'exec:standards' ]);
    grunt.registerTask('standards-fix', [ 'eslint:fix' ]);
