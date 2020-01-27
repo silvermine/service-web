@@ -57,6 +57,7 @@
       "typescript": "3.7.5"
    },
    "dependencies": {
+      "ajv": "6.11.0",
       "tslib": "1.10.0"
    },
    "config": {
