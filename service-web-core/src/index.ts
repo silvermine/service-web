@@ -1,7 +1,5 @@
-import ServiceWeb from './ServiceWeb';
-
-export default ServiceWeb;
+import loadServiceWeb from './config/loaders/loadServiceWeb';
 
 export {
-   ServiceWeb,
+   loadServiceWeb,
 };

@@ -33,6 +33,7 @@
       "@silvermine/eslint-config": "3.0.0-rc.0",
       "@silvermine/typescript-config": "0.9.0",
       "@types/chai": "4.2.7",
+      "@types/js-yaml": "3.12.2",
       "@types/mocha": "5.2.7",
       "@types/node": "12.12.25",
       "@types/sinon": "7.5.1",
@@ -57,7 +58,11 @@
       "typescript": "3.7.5"
    },
    "dependencies": {
+      "@silvermine/toolbox": "git+https://github.com/silvermine/toolbox.git#7cc24a7a764c57a341568c3bf1238c1031e218eb",
       "ajv": "6.11.0",
+      "dependency-graph": "0.8.1",
+      "fast-glob": "3.1.1",
+      "js-yaml": "3.13.1",
       "tslib": "1.10.0"
    },
    "config": {
