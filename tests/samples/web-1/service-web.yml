@@ -12,8 +12,10 @@ serviceTypes:
    -
       name: serverless
       commands:
+         before:build: npm install
          build: sls package --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}
          deploy: sls deploy --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}
+         after:deploy: ./smoke-test.sh
    -
       name: cdk
       commands:

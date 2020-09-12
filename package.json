@@ -58,10 +58,12 @@
       "typescript": "3.7.5"
    },
    "dependencies": {
-      "@silvermine/toolbox": "git+https://github.com/silvermine/toolbox.git#7cc24a7a764c57a341568c3bf1238c1031e218eb",
+      "@silvermine/toolbox": "git+https://github.com/silvermine/toolbox.git#master",
       "ajv": "6.11.0",
+      "commander": "6.1.0",
       "dependency-graph": "0.8.1",
       "fast-glob": "3.1.1",
+      "find-file-up": "2.0.1",
       "js-yaml": "3.13.1",
       "tslib": "1.10.0"
    },

@@ -18,8 +18,8 @@ export default class Service extends BaseUnit<ServiceConfig> {
       return `${this.system.name}:${this.name}`;
    }
 
-   public dependsOn(): ReadonlyArray<Service> {
-      return this.system.web.dependenciesOf(this);
+   public dependsOn(reverse = false): ReadonlyArray<Service> {
+      return this.system.web.dependenciesOf(this, reverse);
    }
 
    public deploymentTargetsFor(envGroup: string): ReadonlyArray<DeploymentTargetConfig> {

@@ -36,19 +36,35 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
       this._clearCurrentCachedGraph();
    }
 
-   public dependencyOrder(): ReadonlyArray<Service> {
+   public dependencyOrder(reverse = false): ReadonlyArray<Service> {
       const graph = this._computeCachedGraph();
 
-      return graph.overallOrder().map((svcID) => {
+      const svcs = graph.overallOrder().map((svcID) => {
          return graph.getNodeData(svcID);
+      });
+
+      return reverse ? svcs.reverse() : svcs;
+   }
+
+   public dependenciesOf(svc: Service, reverse = false): ReadonlyArray<Service> {
+      const graph = this._computeCachedGraph();
+
+      const svcs = graph.dependenciesOf(svc.ID).map((svcID) => {
+         return graph.getNodeData(svcID);
+      });
+
+      return reverse ? svcs.reverse() : svcs;
+   }
+
+   public getServiceFromDirectory(dir: string): Service | undefined {
+      return this.services.find((svc) => {
+         return svc.rootDir === dir;
       });
    }
 
-   public dependenciesOf(svc: Service): ReadonlyArray<Service> {
-      const graph = this._computeCachedGraph();
-
-      return graph.dependenciesOf(svc.ID).map((svcID) => {
-         return graph.getNodeData(svcID);
+   public getServiceByName(name: string): Service | undefined {
+      return this.services.find((svc) => {
+         return svc.name === name || svc.ID === name;
       });
    }
 
@@ -108,4 +124,5 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
 
       return this._graph;
    }
+
 }
