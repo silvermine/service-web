@@ -29,36 +29,36 @@ deploymentTargets:
    -
       name: primary-region-only
       targets:
-         dev:
-            - { region: us-east-1, environment: dev }
-         qa:
-            - { region: us-east-1, environment: qa }
-         prd:
-            - { region: us-east-1, environment: prd }
+         # dev
+         - { region: us-east-1, environmentGroup: dev, environment: dev }
+         # qa
+         - { region: us-east-1, environmentGroup: qa, environment: qa }
+         # prd
+         - { region: us-east-1, environmentGroup: prd, environment: prd }
    -
       name: primary-and-backup-region
       targets:
-         dev:
-            - { region: us-east-1, environment: dev }
-            - { region: eu-west-1, environment: dev }
-         qa:
-            - { region: us-east-1, environment: qa }
-            - { region: eu-west-1, environment: qa }
-         prd:
-            - { region: us-east-1, environment: prd }
-            - { region: eu-west-1, environment: prd }
+         # dev
+         - { region: us-east-1, environmentGroup: dev, environment: dev }
+         - { region: eu-west-1, environmentGroup: dev, environment: dev }
+         # qa
+         - { region: us-east-1, environmentGroup: qa, environment: qa }
+         - { region: eu-west-1, environmentGroup: qa, environment: qa }
+         # prd
+         - { region: us-east-1, environmentGroup: prd, environment: prd }
+         - { region: eu-west-1, environmentGroup: prd, environment: prd }
    -
       name: all-regions
       targets:
-         dev:
-            - { region: us-east-1, environment: dev }
-            - { region: us-west-2, environment: dev }
-            - { region: eu-west-1, environment: dev }
-         qa:
-            - { region: us-east-1, environment: qa }
-            - { region: us-west-2, environment: qa }
-            - { region: eu-west-1, environment: qa }
-         prd:
-            - { region: us-east-1, environment: prd }
-            - { region: us-west-2, environment: prd }
-            - { region: eu-west-1, environment: prd }
+         # dev
+         - { region: us-east-1, environmentGroup: dev, environment: dev }
+         - { region: us-west-2, environmentGroup: dev, environment: dev }
+         - { region: eu-west-1, environmentGroup: dev, environment: dev }
+         # qa
+         - { region: us-east-1, environmentGroup: qa, environment: qa }
+         - { region: us-west-2, environmentGroup: qa, environment: qa }
+         - { region: eu-west-1, environmentGroup: qa, environment: qa }
+         # prd
+         - { region: us-east-1, environmentGroup: prd, environment: prd }
+         - { region: us-west-2, environmentGroup: prd, environment: prd }
+         - { region: eu-west-1, environmentGroup: prd, environment: prd }

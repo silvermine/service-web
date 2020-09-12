@@ -50,17 +50,12 @@ export interface ServiceTypeConfig {
 }
 export interface NamedDeploymentTargetsConfig {
    name: string;
-   targets: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` ".*".
-       */
-      [k: string]: DeploymentTargetConfig[];
-   };
+   targets: DeploymentTargetConfig[];
    [k: string]: any;
 }
 export interface DeploymentTargetConfig {
    region: string;
+   environmentGroup: string;
    environment: string;
    [k: string]: any;
 }

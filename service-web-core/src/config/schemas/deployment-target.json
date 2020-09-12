@@ -7,11 +7,16 @@
 
    "required": [
       "region",
+      "environmentGroup",
       "environment"
    ],
 
    "properties": {
       "region": {
+         "type": "string",
+         "minLength": 1
+      },
+      "environmentGroup": {
          "type": "string",
          "minLength": 1
       },

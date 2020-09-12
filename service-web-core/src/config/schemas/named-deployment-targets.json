@@ -16,15 +16,9 @@
          "minLength": 1
       },
       "targets": {
-         "type": "object",
-         "$comment": "TODO: make sure there's at least one property",
-         "patternProperties": {
-            ".*": {
-               "type": "array",
-               "items": {
-                  "$ref": "deployment-target.json"
-               }
-            }
+         "type": "array",
+         "items": {
+            "$ref": "deployment-target.json"
          }
       }
    }

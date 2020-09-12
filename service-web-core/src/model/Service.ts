@@ -1,6 +1,8 @@
 import System from './System';
 import BaseUnit from './BaseUnit';
 import { ServiceConfig } from '../config/schemas/ServiceWebConfig';
+import { DeploymentTargetConfig } from '../config/schemas/auto-generated-types';
+import ConfigValidationError from '../errors/ConfigValidationError';
 
 export default class Service extends BaseUnit<ServiceConfig> {
 
@@ -18,6 +20,22 @@ export default class Service extends BaseUnit<ServiceConfig> {
 
    public dependsOn(): ReadonlyArray<Service> {
       return this.system.web.dependenciesOf(this);
+   }
+
+   public deploymentTargetsFor(envGroup: string): ReadonlyArray<DeploymentTargetConfig> {
+      if (!this.config.deployment || !this.config.deployment.target) {
+         throw new ConfigValidationError('Service', this.configPath, `${this.name} did not declare a deployment target`);
+      }
+
+      const deploymentType = this.system.web.config.deploymentTargets.find((dt) => {
+         return dt.name === this.config.deployment?.target;
+      });
+
+      const targets = deploymentType?.targets.filter((target) => {
+         return target.environmentGroup === envGroup;
+      });
+
+      return targets || [];
    }
 
 }
