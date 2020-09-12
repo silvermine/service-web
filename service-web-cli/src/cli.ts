@@ -8,6 +8,7 @@ import findFileUp from './lib/findFileUp';
 import runServiceCommand from './commands/runServiceCommand';
 import { CommandRunnerOptions } from '../../service-web-core/src/run/MultiServiceCommandRunner';
 import listServices from './commands/listServices';
+import generateMermaidChart from './commands/generateMermaidChart';
 
 const program = createCommand(),
       pkgDescriptor: { version: string } = require('../../package.json');
@@ -78,6 +79,17 @@ function catchHandler(err: any): never {
          const opts = cmd.opts();
 
          listServices(web, Boolean(program.reverse), Boolean(opts.dependencies));
+      });
+
+   program
+      .command('graph')
+      .description('Generates a dependency graph. From a service directory, or with the --service flag, graphs the dependencies for a single service. From anywhere else, graphs all services.') // eslint-disable-line max-len
+      .option('--service <svc>', 'If you want to generate a graph for a single service, provide that service name here')
+      .option('--output <filePath>', 'If you prefer the output is written to a file instead of stdout, supply a file path')
+      .option('--format <format>', 'Mermaid directional format (TB, BT, LR, RL)', 'BT')
+      .description('Generate a dependency graph for one or all services')
+      .action(async (opts) => {
+         return generateMermaidChart(web, opts.format, opts.service, opts.output);
       });
 
    const commands = web.config.serviceTypes?.reduce((memo, st) => {

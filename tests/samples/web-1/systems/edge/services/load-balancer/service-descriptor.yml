@@ -4,5 +4,6 @@ dependsOn:
    - 'cms:downloads-api'
    - 'cms:management-api'
    - 'search:search-api'
+   - 'edge:alb-vpc'
 deployment:
    target: all-regions
