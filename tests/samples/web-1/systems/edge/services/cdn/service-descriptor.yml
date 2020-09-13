@@ -2,4 +2,5 @@ name: cdn
 dependsOn:
    - 'edge:load-balancer'
 deployment:
-   target: primary-region-only
+   namedTargets:
+      - primary-region-only

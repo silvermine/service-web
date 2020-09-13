@@ -6,4 +6,5 @@ dependsOn:
    - 'search:search-api'
    - 'edge:alb-vpc'
 deployment:
-   target: all-regions
+   namedTargets:
+      - all-regions

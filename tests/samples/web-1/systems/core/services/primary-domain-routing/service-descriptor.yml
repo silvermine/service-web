@@ -1,3 +1,4 @@
 name: primary-domain-routing
 deployment:
-   target: all-regions
+   namedTargets:
+      - all-regions

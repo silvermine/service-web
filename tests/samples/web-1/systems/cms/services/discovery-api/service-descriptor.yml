@@ -2,4 +2,5 @@ name: discovery-api
 dependsOn:
    - 'core:content-storage'
 deployment:
-   target: all-regions
+   namedTargets:
+      - all-regions

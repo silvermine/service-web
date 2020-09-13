@@ -11,10 +11,25 @@
       },
       "deployment": {
          "type": "object",
-         "required": [ "target" ],
+         "anyOf": [
+            { "required": [ "namedTargets" ] },
+            { "required": [ "customTargets" ] }
+         ],
+         "additionalProperties": false,
          "properties": {
-            "target": {
-               "type": "string",
+            "namedTargets": {
+               "type": "array",
+               "items": {
+                  "type": "string",
+                  "minLength": 1
+               },
+               "minLength": 1
+            },
+            "customTargets": {
+               "type": "array",
+               "items": {
+                  "$ref": "deployment-target.json"
+               },
                "minLength": 1
             }
          }

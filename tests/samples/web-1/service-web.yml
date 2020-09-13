@@ -9,6 +9,12 @@ systemDefaults:
       type: serverless
 
 serviceTypes:
+   # Available environment variables:
+   # SVC_WEB_SYSTEM_NAME
+   # SVC_WEB_SERVICE_NAME
+   # SVC_WEB_ENV_GROUP
+   # SVC_WEB_ENV
+   # SVC_WEB_REGION
    -
       name: serverless
       commands:
@@ -22,6 +28,8 @@ serviceTypes:
          build: cdk synth
          deploy: cdk deploy
    -
+      # custom services must define their own build and deploy commands or else they will
+      # result in failures when these placeholder commands run
       name: custom
       commands:
          build: echo "No defined build process for custom service types" && exit 1

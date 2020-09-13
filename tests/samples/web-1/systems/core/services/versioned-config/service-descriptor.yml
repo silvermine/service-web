@@ -1,10 +1,16 @@
 name: versioned-config
+type: custom
 dependsOn:
    - 'core:config-storage'
 deployment:
-   target: primary-region-only
+   namedTargets:
+      - primary-region-only
 commands:
    build: echo "No build process needed for ${SVC_WEB_SVC_NAME}"
    deploy: >
-      aws s3 sync ./global/ s3://mycompany-core-config-storage-${SVC_WEB_ENV_GROUP}/global/ &&
-      aws s3 sync ./per-env-group/${SVC_WEB_ENV_GROUP}/ s3://mycompany-core-config-storage-${SVC_WEB_ENV_GROUP}/local/
+      aws s3 sync
+        ./global/
+        s3://mycompany-core-config-storage-${SVC_WEB_ENV_GROUP}/global/ &&
+      aws s3 sync
+        ./per-env-group/${SVC_WEB_ENV_GROUP}/
+        s3://mycompany-core-config-storage-${SVC_WEB_ENV_GROUP}/local/

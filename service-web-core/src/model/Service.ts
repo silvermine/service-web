@@ -23,19 +23,37 @@ export default class Service extends BaseUnit<ServiceConfig> {
    }
 
    public deploymentTargetsFor(envGroup: string): ReadonlyArray<DeploymentTargetConfig> {
-      if (!this.config.deployment || !this.config.deployment.target) {
-         throw new ConfigValidationError('Service', this.configPath, `${this.name} did not declare a deployment target`);
+      const targets: DeploymentTargetConfig[] = [];
+
+      function addApplicableTargets(available: DeploymentTargetConfig[]): void {
+         available.forEach((t) => {
+            if (t.environmentGroup === envGroup) {
+               targets.push(t);
+            }
+         });
       }
 
-      const deploymentType = this.system.web.config.deploymentTargets.find((dt) => {
-         return dt.name === this.config.deployment?.target;
-      });
+      if (this.config.deployment.namedTargets) {
+         this.config.deployment.namedTargets.forEach((name) => {
+            const dt = this.system.web.config.deploymentTargets.find((t) => {
+               return t.name === name;
+            });
 
-      const targets = deploymentType?.targets.filter((target) => {
-         return target.environmentGroup === envGroup;
-      });
+            if (!dt) {
+               throw new ConfigValidationError('Service', this.configPath, `${this.name} defines non-existent deployment target "${name}"`);
+            }
 
-      return targets || [];
+            addApplicableTargets(dt.targets);
+         });
+      }
+
+      addApplicableTargets(this.config.deployment.customTargets || []);
+
+      return targets;
    }
 
+   public async runNamedCommand(cmd: string, target: DeploymentTargetConfig): Promise<void> {
+      console.info(`Running ${cmd} for ${this.ID} in ${target.region}:${target.environmentGroup}:${target.environment}`); // eslint-disable-line no-console, max-len
+      return Promise.resolve();
+   }
 }

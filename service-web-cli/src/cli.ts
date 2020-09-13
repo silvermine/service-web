@@ -5,10 +5,13 @@ import { relative } from 'path';
 import ConfigSchemaValidationError from '../../service-web-core/src/errors/ConfigSchemaValidationError';
 import InputError from './InputError';
 import findFileUp from './lib/findFileUp';
-import runServiceCommand from './commands/runServiceCommand';
-import { CommandRunnerOptions } from '../../service-web-core/src/run/MultiServiceCommandRunner';
+import runForEachDeploymentTarget, { Runner } from './commands/runForEachDeploymentTarget';
+import { ServiceListOptions } from '../../service-web-core/src/lib/makeServiceList';
 import listServices from './commands/listServices';
 import generateMermaidChart from './commands/generateMermaidChart';
+import Web from '../../service-web-core/src/model/Web';
+import Service from '../../service-web-core/src/model/Service';
+import { DeploymentTargetConfig } from '../../service-web-core/src/config/schemas/auto-generated-types';
 
 const program = createCommand(),
       pkgDescriptor: { version: string } = require('../../package.json');
@@ -33,15 +36,65 @@ function catchHandler(err: any): never {
    process.exit(1);
 }
 
+export interface StandardOptions {
+   environmentGroup?: string;
+   environment?: string;
+   region?: string;
+}
+
+function getStandardOptions(): StandardOptions {
+   const opts = program.opts();
+
+   return {
+      environmentGroup: opts.envGroup,
+      environment: opts.env,
+      region: opts.region,
+   };
+}
+
+function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string, runner: Runner): void {
+   program
+      .command(cmdName)
+      .description(desc)
+      .option('--all', 'Run this command for all services in the web')
+      .option('--with-deps', 'Add services that are dependencies of those you\'re running the command on')
+      .option('--exact-order', 'Do not do any sorting. Deploy services in the order specified. Only used when service names are specified as arguments.') // eslint-disable-line max-len
+      .action(async (cmd) => {
+         const opts = Object.assign({}, program.opts(), cmd.opts()),
+               standardOpts = getStandardOptions();
+
+         const commandOpts: ServiceListOptions = {
+            addDependencies: Boolean(opts.withDeps),
+            reverse: Boolean(opts.reverse),
+            skipSort: Boolean(opts.exactOrder),
+         };
+
+         if (commandOpts.skipSort && (opts.all || isEmpty(cmd.args) || commandOpts.addDependencies)) {
+            throw new InputError(
+               '--exact-order only allowed when specifying service names, and not allowed with --with-deps or --all'
+            );
+         }
+
+         if (isEmpty(standardOpts.environmentGroup)) {
+            throw new InputError('Must provide --env-group option for this command to select any targets');
+         }
+
+         Object.assign(commandOpts, standardOpts);
+
+         return runForEachDeploymentTarget(web, opts.all ? [ '*' ] : cmd.args, commandOpts, runner);
+      });
+}
+
 (async () => {
    const defaultWebConfig = await findFileUp('service-web.yml'),
          relativeWebConfigPath = defaultWebConfig ? relative(process.cwd(), defaultWebConfig) : undefined;
 
    program.requiredOption('-w, --web <path>', 'Path to service web config file', relativeWebConfigPath);
-   program.option('-g, --env-group <environmentGroup>', 'Environment group', 'dev');
-   program.option('-e, --env <environment>', 'Environment (also known as "stage")', 'dev');
+   program.option('--env-group <environmentGroup>', 'Environment group');
+   program.option('--env <environment>', 'Environment (also known as "stage")');
+   program.option('--region <region>', 'Region to run commands in, where applicable');
+   program.option('--reverse', 'When running commands that rely on dependency order, reverse the order');
    program.option('-v, --verbose', 'Print debug-level log messages');
-   program.option('-r, --reverse', 'When running commands that rely on dependency order, reverse the order');
 
    const origDebug = console.debug;
 
@@ -101,34 +154,24 @@ function catchHandler(err: any): never {
       return memo;
    }, [] as string[]) || [];
 
+   addDeploymentTargetBasedCommand(
+      web,
+      'list-targets',
+      'List all deployment targets (regions, environments) for one, several, or all services.',
+      (s: Service, t: DeploymentTargetConfig): Promise<void> => {
+         console.info(`${s.ID}\t${t.region}\t${t.environmentGroup}\t${t.environment}`);
+         return Promise.resolve();
+      }
+   );
+
    commands.forEach((cmdName) => {
       const desc = `Run the "${cmdName}" commands for the current service.\n` +
          'Or, specify a list of sys:svc names after -- to deploy a list of services, e.g.\n' +
          'web deploy -- core:access-control core:database edge:load-balancer';
 
-      program
-         .command(cmdName)
-         .description(desc)
-         .option('--all', 'Run this command for all services in the web')
-         .option('--with-deps', 'Add services that are dependencies of those you\'re running the command on')
-         .option('--exact-order', 'Do not do any sorting. Deploy services in the order specified. Only used when service names are specified as arguments.') // eslint-disable-line max-len
-         .action(async (cmd) => {
-            const opts = Object.assign({}, program.opts(), cmd.opts());
-
-            const commandOpts: CommandRunnerOptions = {
-               addDependencies: Boolean(opts.withDeps),
-               reverse: Boolean(opts.reverse),
-               skipSort: Boolean(opts.exactOrder),
-            };
-
-            if (commandOpts.skipSort && (opts.all || isEmpty(cmd.args) || commandOpts.addDependencies)) {
-               throw new InputError(
-                  '--exact-order only allowed when specifying service names, and not allowed with --with-deps or --all'
-               );
-            }
-
-            return runServiceCommand(web, cmdName, opts.all ? [ '*' ] : cmd.args, commandOpts);
-         });
+      addDeploymentTargetBasedCommand(web, cmdName, desc, (s: Service, t: DeploymentTargetConfig) => {
+         return s.runNamedCommand(cmdName, t);
+      });
    });
 
    program.action(() => { program.outputHelp(); });

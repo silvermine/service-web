@@ -1,3 +1,4 @@
 name: alb-vpc
 deployment:
-   target: all-regions
+   namedTargets:
+      - all-regions

@@ -30,7 +30,6 @@ export interface SystemConfig {
 export interface ServiceConfig {
    name?: UnitName;
    deployment?: {
-      target: string;
       [k: string]: any;
    };
    isRootDependency?: boolean;
@@ -57,5 +56,4 @@ export interface DeploymentTargetConfig {
    region: string;
    environmentGroup: string;
    environment: string;
-   [k: string]: any;
 }

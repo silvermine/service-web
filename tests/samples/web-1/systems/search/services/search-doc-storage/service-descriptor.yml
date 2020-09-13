@@ -1,4 +1,5 @@
 name: search-doc-storage
 type: serverless
 deployment:
-   target: primary-and-backup-region
+   namedTargets:
+      - primary-and-backup-region

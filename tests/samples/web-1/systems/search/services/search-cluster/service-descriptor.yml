@@ -1,3 +1,4 @@
 name: search-cluster
 deployment:
-   target: all-regions
+   namedTargets:
+      - all-regions

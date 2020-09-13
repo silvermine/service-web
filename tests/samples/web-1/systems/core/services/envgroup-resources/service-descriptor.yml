@@ -3,4 +3,8 @@ isRootDependency: true # all services implicitly depend on this service without 
 dependsOn:
    - 'core:root-resources' # but this (also root) dependency must deploy first
 deployment:
-   target: all-regions
+   namedTargets:
+      - all-regions
+   # In addition to the named targets, add this custom target to deploy an additional env
+   customTargets:
+      - { region: us-east-1, environmentGroup: dev, environment: extra }
