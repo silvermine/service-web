@@ -19,12 +19,25 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
    }
 
    public get services(): ReadonlyArray<Service> {
-      return this._systems.reduce((memo, sys) => {
+      const services = this._systems.reduce((memo, sys) => {
          sys.services.forEach((svc) => {
             memo.push(svc);
          });
          return memo;
       }, [] as Service[]);
+
+      // This sort is not strictly necessary, but allows for better testing because having
+      // the services sorted in some deterministic way provides for deterministic results.
+      services.sort((a, b) => {
+         if (a.configPath < b.configPath) {
+            return -1;
+         } else if (a.configPath > b.configPath) {
+            return 1;
+         }
+         return 0;
+      });
+
+      return services;
    }
 
    public systemAdded(sys: System): void {
