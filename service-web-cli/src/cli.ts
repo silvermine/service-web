@@ -1,4 +1,4 @@
-import { isEmpty } from '@silvermine/toolbox';
+import { flatten, isEmpty } from '@silvermine/toolbox';
 import { loadServiceWeb } from '../../service-web-core/src';
 import { createCommand, CommanderError } from 'commander';
 import { relative } from 'path';
@@ -189,6 +189,29 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
          }
       });
    });
+
+   program
+      .command('list-env-groups')
+      .description('List all possible environment groups registered with any service. Ignores --env-group options, but respects --env and --region options, listing only env-groups applicable to the given env and/or region') // eslint-disable-line max-len
+      .action(() => {
+         const opts = getStandardOptions();
+
+         const envGroups = flatten(...web.services.map((svc) => {
+            return svc.getAllEnvironmentGroups(opts.environment, opts.region);
+         }));
+
+         envGroups
+            .sort()
+            .reduce((memo, eg) => {
+               if (!memo.includes(eg)) {
+                  memo.push(eg);
+               }
+               return memo;
+            }, [] as string[])
+            .forEach((eg) => {
+               console.info(eg);
+            });
+      });
 
    program.action(() => { program.outputHelp(); });
    program.exitOverride();
