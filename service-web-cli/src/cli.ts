@@ -13,13 +13,13 @@ import Web from '../../service-web-core/src/model/Web';
 import Service from '../../service-web-core/src/model/Service';
 import { DeploymentTargetConfig } from '../../service-web-core/src/config/schemas/auto-generated-types';
 import { ShellCommandError } from '../../service-web-core/src/lib/runShellCommands';
+import { version as packageVersion } from '../../package.json';
 
-const program = createCommand(),
-      pkgDescriptor: { version: string } = require('../../package.json');
+const program = createCommand();
 
 program
    .name('web')
-   .version(pkgDescriptor.version, '--version', 'output the service-web version in use');
+   .version(packageVersion, '--version', 'output the service-web version in use');
 
 function catchHandler(err: any): never {
    if (err instanceof CommanderError) {
