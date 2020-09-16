@@ -1,6 +1,10 @@
 {
    "extends": "@silvermine/typescript-config/tsconfig.types.json",
    "compilerOptions": {
-      "outDir": "../dist/types/"
-   }
+      "outDir": "./dist/types/"
+   },
+   "exclude": [
+      "dist"
+   ]
+
 }
