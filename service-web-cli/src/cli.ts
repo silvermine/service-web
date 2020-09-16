@@ -163,7 +163,7 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
       'list-targets',
       'List all deployment targets (regions, environments) for one, several, or all services.',
       (s: Service, t: DeploymentTargetConfig): Promise<void> => {
-         console.info(`${s.ID}\t${t.region}\t${t.environmentGroup}\t${t.environment}`);
+         console.info(`${s.system.name}\t${s.name}\t${t.region}\t${t.environmentGroup}\t${t.environment}`);
          return Promise.resolve();
       }
    );
