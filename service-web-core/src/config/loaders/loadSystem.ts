@@ -1,4 +1,4 @@
-import { isArray, isString } from 'util';
+import { isArray, isString } from '@silvermine/toolbox';
 import Web from '../../model/Web';
 import System from '../../model/System';
 import { SystemConfig } from '../schemas/ServiceWebConfig';
@@ -8,10 +8,13 @@ import loadService from './loadService';
 import ConfigValidationError from '../../errors/ConfigValidationError';
 
 export default async function loadSystem(web: Web, configPath: string): Promise<System> {
-   const config = await loadAndValidateConfig(configPath, 'System') as SystemConfig;
-
    // TODO: better extension of defaults:
-   Object.assign(config, web.config.systemDefaults); // TODO test no additional properties
+   // TODO: test no additional properties:
+   const config = Object.assign(
+      {},
+      web.config.systemDefaults,
+      await loadAndValidateConfig(configPath, 'System') as SystemConfig
+   );
 
    if (!isString(config.name)) {
       throw new ConfigValidationError('Service', configPath, 'Services must specify a name for themselves');
