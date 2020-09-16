@@ -14,6 +14,7 @@ import Service from '../../service-web-core/src/model/Service';
 import { DeploymentTargetConfig } from '../../service-web-core/src/config/schemas/auto-generated-types';
 import { ShellCommandError } from '../../service-web-core/src/lib/runShellCommands';
 import { version as packageVersion } from '../../package.json';
+import System from '../../service-web-core/src/model/System';
 
 const program = createCommand();
 
@@ -210,6 +211,37 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
             }, [] as string[])
             .forEach((eg) => {
                console.info(eg);
+            });
+      });
+
+   program
+      .command('list-systems')
+      .description('Lists all systems in this web. When used with the --env-group, --env, or --region flags, only lists systems that deploy to the given env group, env, and/or region') // eslint-disable-line max-len
+      .action(() => {
+         const opts = getStandardOptions();
+
+         web.services
+            .filter((svc) => {
+               const envGroups = opts.environmentGroup ? [ opts.environmentGroup ] : svc.getAllEnvironmentGroups();
+
+               return !!envGroups.find((eg) => {
+                  return !!svc.deploymentTargetsFor(eg).find((dt) => {
+                     return (opts.environment ? dt.environment === opts.environment : true)
+                        && (opts.region ? dt.region === opts.region : true);
+                  });
+               });
+            })
+            .map((svc) => {
+               return svc.system;
+            })
+            .reduce((memo, sys) => {
+               if (!memo.includes(sys)) {
+                  memo.push(sys);
+               }
+               return memo;
+            }, [] as System[])
+            .forEach((sys) => {
+               console.info(`${sys.name}\t${relative(process.cwd(), sys.rootDir)}`);
             });
       });
 
