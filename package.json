@@ -6,7 +6,7 @@
    "types": "./dist/types/index.d.ts",
    "module": "./dist/esm/index",
    "bin": {
-      "svcweb": "./service-web-cli/cli.sh"
+      "svcweb": "./service-web-cli/npmcli.sh"
    },
    "scripts": {
       "prepare": "grunt build",
