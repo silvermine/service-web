@@ -127,12 +127,15 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
 
    program
       .command('list')
-      .description('List services in the web, in dependency order')
+      .description('List services in the web, in dependency order. If an env group, environment, or region are specified, only services that deploy to those env groups, environments, and/or regions will be listed.') // eslint-disable-line max-len
       .option('-d, --dependencies', 'list dependencies for each service')
       .action((cmd) => {
-         const opts = cmd.opts();
+         const opts = Object.assign({}, getStandardOptions(), cmd.opts());
 
-         listServices(web, Boolean(program.reverse), Boolean(opts.dependencies));
+         listServices(web, Object.assign({}, getStandardOptions(), {
+            reverse: Boolean(program.reverse),
+            listDependencies: Boolean(opts.dependencies),
+         }));
       });
 
    program
