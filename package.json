@@ -57,7 +57,6 @@
       "sinon": "8.1.1",
       "source-map-support": "0.5.16",
       "standard-version": "7.1.0",
-      "ts-node": "8.6.2",
       "typescript": "3.7.5"
    },
    "dependencies": {
@@ -69,6 +68,7 @@
       "find-file-up": "2.0.1",
       "js-yaml": "3.13.1",
       "mermaid": "8.8.0",
+      "ts-node": "9.0.0",
       "tslib": "1.10.0"
    },
    "config": {
