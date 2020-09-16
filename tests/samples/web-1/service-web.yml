@@ -15,25 +15,36 @@ serviceTypes:
    # SVC_WEB_ENV_GROUP
    # SVC_WEB_ENV
    # SVC_WEB_REGION
+   # We use echo commands in all these samples instead of real commands for easier testing.
    -
       name: serverless
       commands:
-         before:build: npm install
-         build: sls package --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}
-         deploy: sls deploy --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}
-         after:deploy: ./smoke-test.sh
+         before:build:
+            - echo "Before build for ${SVC_WEB_SYSTEM_NAME}:${SVC_WEB_SERVICE_NAME}:${SVC_WEB_ENV_GROUP}:${SVC_WEB_ENV}:${SVC_WEB_REGION}"
+         build:
+            - echo "sls package --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}"
+         deploy:
+            - echo "sls deploy --env-group ${SVC_WEB_ENV_GROUP} --stage ${SVC_WEB_ENV}"
+         after:deploy:
+            - echo "./smoke-test.sh"
    -
       name: cdk
       commands:
-         build: cdk synth
-         deploy: cdk deploy
+         build:
+            - echo cdk synth
+         deploy:
+            - echo cdk deploy
    -
       # custom services must define their own build and deploy commands or else they will
       # result in failures when these placeholder commands run
       name: custom
       commands:
-         build: echo "No defined build process for custom service types" && exit 1
-         deploy: echo "No defined deployment process for custom service types" && exit 1
+         build:
+            - echo "No defined build process for custom service types"
+            - exit 1
+         deploy:
+            - echo "No defined deployment process for custom service types"
+            - exit 1
 
 deploymentTargets:
    -

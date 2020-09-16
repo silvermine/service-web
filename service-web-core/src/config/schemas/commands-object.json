@@ -1,0 +1,21 @@
+{
+   "$id": "https://github.com/silvermine/service-web/schemas/commands-object.json",
+   "title": "Commands Object",
+   "$schema": "http://json-schema.org/draft-07/schema",
+
+   "type": "object",
+   "propertyNames": {
+      "pattern": "^(before:|after:)?[A-Za-z]+$"
+   },
+   "patternProperties": {
+      ".*": {
+         "type": "array",
+         "items": {
+            "type": "string",
+            "minLength": 1
+         },
+         "minLength": 1
+      }
+   }
+
+}

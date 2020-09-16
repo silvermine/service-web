@@ -12,6 +12,7 @@ import generateMermaidChart from './commands/generateMermaidChart';
 import Web from '../../service-web-core/src/model/Web';
 import Service from '../../service-web-core/src/model/Service';
 import { DeploymentTargetConfig } from '../../service-web-core/src/config/schemas/auto-generated-types';
+import { ShellCommandError } from '../../service-web-core/src/lib/runShellCommands';
 
 const program = createCommand(),
       pkgDescriptor: { version: string } = require('../../package.json');
@@ -169,8 +170,18 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
          'Or, specify a list of sys:svc names after -- to deploy a list of services, e.g.\n' +
          'web deploy -- core:access-control core:database edge:load-balancer';
 
-      addDeploymentTargetBasedCommand(web, cmdName, desc, (s: Service, t: DeploymentTargetConfig) => {
-         return s.runNamedCommand(cmdName, t);
+      addDeploymentTargetBasedCommand(web, cmdName, desc, async (s: Service, t: DeploymentTargetConfig) => {
+         console.info(`Running ${cmdName} for ${s.ID} in ${t.region}:${t.environmentGroup}:${t.environment}`);
+
+         try {
+            await s.runNamedCommand(cmdName, t);
+         } catch(err) {
+            if (err instanceof ShellCommandError) {
+               console.error(`Error running ${cmdName} for ${s.ID}: ${err}\n${err.stack}`);
+               process.exit(err.exitCode);
+            }
+            throw err;
+         }
       });
    });
 

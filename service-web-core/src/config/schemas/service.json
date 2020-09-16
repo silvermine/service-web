@@ -9,6 +9,10 @@
       "name": {
          "$ref": "unit-name.json"
       },
+      "type": {
+         "type": "string",
+         "minLength": 1
+      },
       "deployment": {
          "type": "object",
          "anyOf": [
@@ -33,6 +37,9 @@
                "minLength": 1
             }
          }
+      },
+      "commands": {
+         "$ref": "commands-object.json"
       },
       "isRootDependency": {
          "type": "boolean",

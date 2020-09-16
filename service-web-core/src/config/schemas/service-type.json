@@ -15,13 +15,7 @@
          "$ref": "unit-name.json"
       },
       "commands": {
-         "type": "object",
-         "patternProperties": {
-            ".*": {
-               "type": "string",
-               "minLength": 1
-            }
-         }
+         "$ref": "commands-object.json"
       }
    }
 

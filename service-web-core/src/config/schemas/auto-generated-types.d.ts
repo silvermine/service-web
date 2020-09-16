@@ -29,22 +29,25 @@ export interface SystemConfig {
 }
 export interface ServiceConfig {
    name?: UnitName;
+   type?: string;
    deployment?: {
       [k: string]: any;
    };
+   commands?: CommandsObject;
    isRootDependency?: boolean;
    dependsOn?: string[];
    [k: string]: any;
 }
+export interface CommandsObject {
+   /**
+    * This interface was referenced by `CommandsObject`'s JSON-Schema definition
+    * via the `patternProperty` ".*".
+    */
+   [k: string]: string[];
+}
 export interface ServiceTypeConfig {
    name: UnitName;
-   commands: {
-      /**
-       * This interface was referenced by `undefined`'s JSON-Schema definition
-       * via the `patternProperty` ".*".
-       */
-      [k: string]: string;
-   };
+   commands: CommandsObject;
    [k: string]: any;
 }
 export interface NamedDeploymentTargetsConfig {

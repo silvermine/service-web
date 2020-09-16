@@ -9,6 +9,7 @@ export interface Schemas {
    DeploymentTarget: any;
    ServiceType: any;
    UnitName: any;
+   CommandsObject: any;
 }
 
 export const SCHEMAS: Schemas = {
@@ -19,4 +20,5 @@ export const SCHEMAS: Schemas = {
    DeploymentTarget: require('./deployment-target.json'),
    ServiceType: require('./service-type.json'),
    UnitName: require('./unit-name.json'),
+   CommandsObject: require('./commands-object.json'),
 };

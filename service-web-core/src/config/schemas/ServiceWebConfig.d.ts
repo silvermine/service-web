@@ -7,7 +7,7 @@ export interface ServiceWebConfig extends BASE.ServiceWebConfig {}
 
 export interface SystemConfig extends RequireOptional<BASE.SystemConfig, 'name' | 'services'> {}
 
-export interface ServiceConfig extends RequireOptional<BASE.ServiceConfig, 'name'> {
+export interface ServiceConfig extends RequireOptional<BASE.ServiceConfig, 'name' | 'type'> {
    deployment: {
       namedTargets?: string[];
       customTargets?: BASE.DeploymentTargetConfig[];

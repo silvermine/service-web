@@ -1,8 +1,10 @@
 import System from './System';
 import BaseUnit from './BaseUnit';
 import { ServiceConfig } from '../config/schemas/ServiceWebConfig';
-import { DeploymentTargetConfig } from '../config/schemas/auto-generated-types';
+import { DeploymentTargetConfig, ServiceTypeConfig } from '../config/schemas/auto-generated-types';
 import ConfigValidationError from '../errors/ConfigValidationError';
+import runShellCommands from '../lib/runShellCommands';
+import { flatten } from '@silvermine/toolbox';
 
 export default class Service extends BaseUnit<ServiceConfig> {
 
@@ -52,8 +54,46 @@ export default class Service extends BaseUnit<ServiceConfig> {
       return targets;
    }
 
+   public get serviceType(): ServiceTypeConfig {
+      const st = this.system.web.config.serviceTypes?.find((t) => {
+         return t.name === this.config.type;
+      });
+
+      if (!st) {
+         throw new ConfigValidationError('Service', this.configPath, `Invalid service type ${this.config.type}`);
+      }
+
+      return st;
+   }
+
    public async runNamedCommand(cmd: string, target: DeploymentTargetConfig): Promise<void> {
-      console.info(`Running ${cmd} for ${this.ID} in ${target.region}:${target.environmentGroup}:${target.environment}`); // eslint-disable-line no-console, max-len
-      return Promise.resolve();
+      return runShellCommands(this.rootDir, this._getCommands(cmd), {
+         copyEnv: true,
+         env: {
+            SVC_WEB_SYSTEM_NAME: this.system.name,
+            SVC_WEB_SERVICE_NAME: this.name,
+            SVC_WEB_ENV_GROUP: target.environmentGroup,
+            SVC_WEB_ENV: target.environment,
+            SVC_WEB_REGION: target.region,
+         },
+      });
+   }
+
+   private _getCommands(name: string): string[] {
+      const commands = flatten(
+         this._getCommand(`before:${name}`),
+         this._getCommand(name),
+         this._getCommand(`after:${name}`)
+      );
+
+      if (commands.length === 0) {
+         throw new ConfigValidationError('Service', this.configPath, `No commands found for the "${name}" named command`);
+      }
+
+      return commands;
+   }
+
+   private _getCommand(name: string): string[] {
+      return this.config.commands?.[name] || this.serviceType.commands[name] || [];
    }
 }
