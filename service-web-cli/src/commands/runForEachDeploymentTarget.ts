@@ -11,7 +11,9 @@ export interface Runner {
    (svc: Service, target: DeploymentTargetConfig): Promise<void>;
 }
 
-type RunCommandOptions = ServiceListOptions & StandardOptions;
+export interface RunForEachDeploymentTargetOptions extends ServiceListOptions, StandardOptions {
+   startAtService?: string;
+}
 
 function filterTargets(opts: StandardOptions, tc: DeploymentTargetConfig): boolean {
    // console.info(opts.region, tc.region, opts.environment, tc.environment);
@@ -19,7 +21,7 @@ function filterTargets(opts: StandardOptions, tc: DeploymentTargetConfig): boole
       && (!opts.environment || (opts.environment === tc.environment));
 }
 
-export default async function runForEachDeploymentTarget(web: Web, serviceNames: string[], opts: RunCommandOptions, runner: Runner): Promise<void> { // eslint-disable-line max-len
+export default async function runForEachDeploymentTarget(web: Web, serviceNames: string[], opts: RunForEachDeploymentTargetOptions, runner: Runner): Promise<void> { // eslint-disable-line max-len
    let services: Service[] = [];
 
    if (serviceNames.find((n) => { return n === '*'; })) {
@@ -55,7 +57,17 @@ export default async function runForEachDeploymentTarget(web: Web, serviceNames:
          return memo;
       }, [] as [ Service, DeploymentTargetConfig ][]);
 
+   let skipping = !!opts.startAtService;
+
    for (let link of flatChain) {
+      if (skipping) {
+         if (link[0].ID === opts.startAtService || link[0].name === opts.startAtService) {
+            skipping = false;
+         } else {
+            console.info(`Skipping ${link[0].ID} because we will not start until service ${opts.startAtService}`);
+            continue;
+         }
+      }
       await runner(link[0], link[1]);
    }
 }

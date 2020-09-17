@@ -5,8 +5,7 @@ import { relative } from 'path';
 import ConfigSchemaValidationError from '../../service-web-core/src/errors/ConfigSchemaValidationError';
 import InputError from './InputError';
 import findFileUp from './lib/findFileUp';
-import runForEachDeploymentTarget, { Runner } from './commands/runForEachDeploymentTarget';
-import { ServiceListOptions } from '../../service-web-core/src/lib/makeServiceList';
+import runForEachDeploymentTarget, { RunForEachDeploymentTargetOptions, Runner } from './commands/runForEachDeploymentTarget';
 import listServices from './commands/listServices';
 import generateMermaidChart from './commands/generateMermaidChart';
 import Web from '../../service-web-core/src/model/Web';
@@ -61,11 +60,12 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
       .option('--all', 'Run this command for all services in the web')
       .option('--with-deps', 'Add services that are dependencies of those you\'re running the command on')
       .option('--exact-order', 'Do not do any sorting. Deploy services in the order specified. Only used when service names are specified as arguments.') // eslint-disable-line max-len
+      .option('--start-at <service>', 'Start at a given service, skipping all that come before it. Useful for restarting a command that failed part way through.') // eslint-disable-line max-len
       .action(async (cmd) => {
          const opts = Object.assign({}, program.opts(), cmd.opts()),
                standardOpts = getStandardOptions();
 
-         const commandOpts: ServiceListOptions = {
+         const commandOpts: RunForEachDeploymentTargetOptions = {
             addDependencies: Boolean(opts.withDeps),
             reverse: Boolean(opts.reverse),
             skipSort: Boolean(opts.exactOrder),
@@ -82,6 +82,10 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
          }
 
          Object.assign(commandOpts, standardOpts);
+
+         if (opts.startAt) {
+            commandOpts.startAtService = opts.startAt;
+         }
 
          return runForEachDeploymentTarget(web, opts.all ? [ '*' ] : cmd.args, commandOpts, runner);
       });
