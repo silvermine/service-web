@@ -7,8 +7,15 @@ import { StandardOptions } from '../cli';
 import { DeploymentTargetConfig } from '../../../service-web-core/src/config/schemas/auto-generated-types';
 import InputError from '../InputError';
 
+interface Progress {
+   totalServices: number;
+   currentService: number;
+   totalTargets: number;
+   currentTarget: number;
+}
+
 export interface Runner {
-   (svc: Service, target: DeploymentTargetConfig): Promise<void>;
+   (svc: Service, target: DeploymentTargetConfig, progress: Progress): Promise<void>;
 }
 
 export interface RunForEachDeploymentTargetOptions extends ServiceListOptions, StandardOptions {
@@ -49,25 +56,53 @@ export default async function runForEachDeploymentTarget(web: Web, serviceNames:
       });
    }
 
+   let skipping = !!opts.startAtService,
+       totalServices = 0,
+       currentService = 0,
+       currentTarget = 0,
+       lastService: Service | undefined;
+
    const flatChain = makeDeploymentChain(web, opts.environmentGroup || '', services, opts)
       .reduce((memo, link) => {
          link.targets.filter(filterTargets.bind(null, opts)).forEach((t) => {
             memo.push([ link.service, t ]);
          });
          return memo;
-      }, [] as [ Service, DeploymentTargetConfig ][]);
+      }, [] as [ Service, DeploymentTargetConfig ][])
+      .filter(([ svc ]) => {
+         if (skipping) {
+            if (svc.ID === opts.startAtService || svc.name === opts.startAtService) {
+               skipping = false;
+               totalServices = totalServices + 1;
+               lastService = svc;
+               return true;
+            }
+            if (lastService !== svc) {
+               console.info(`Skipping ${svc.ID} - will not start until ${opts.startAtService}`);
+            }
+            lastService = svc;
+            return false;
+         }
+         if (lastService !== svc) {
+            totalServices = totalServices + 1;
+         }
+         lastService = svc;
+         return true;
+      });
 
-   let skipping = !!opts.startAtService;
+   lastService = undefined;
 
    for (let link of flatChain) {
-      if (skipping) {
-         if (link[0].ID === opts.startAtService || link[0].name === opts.startAtService) {
-            skipping = false;
-         } else {
-            console.info(`Skipping ${link[0].ID} because we will not start until service ${opts.startAtService}`);
-            continue;
-         }
+      if (lastService !== link[0]) {
+         currentService = currentService + 1;
       }
-      await runner(link[0], link[1]);
+      currentTarget = currentTarget + 1;
+      lastService = link[0];
+      await runner(link[0], link[1], {
+         currentService,
+         totalServices,
+         currentTarget,
+         totalTargets: flatChain.length,
+      });
    }
 }

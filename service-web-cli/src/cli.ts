@@ -180,8 +180,9 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
          'Or, specify a list of sys:svc names after -- to deploy a list of services, e.g.\n' +
          'web deploy -- core:access-control core:database edge:load-balancer';
 
-      addDeploymentTargetBasedCommand(web, cmdName, desc, async (s: Service, t: DeploymentTargetConfig) => {
+      addDeploymentTargetBasedCommand(web, cmdName, desc, async (s: Service, t: DeploymentTargetConfig, p) => {
          console.info(`Running ${cmdName} for ${s.ID} in ${t.region}:${t.environmentGroup}:${t.environment}`);
+         console.info(`Progress: Service ${p.currentService} of ${p.totalServices} | Target ${p.currentTarget} of ${p.totalTargets}`);
 
          try {
             await s.runNamedCommand(cmdName, t);
