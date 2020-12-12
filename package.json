@@ -61,7 +61,7 @@
       "typescript": "3.7.5"
    },
    "dependencies": {
-      "@silvermine/toolbox": "git+https://github.com/silvermine/toolbox.git#master",
+      "@silvermine/toolbox": "0.1.0",
       "ajv": "6.11.0",
       "commander": "6.1.0",
       "dependency-graph": "0.8.1",
