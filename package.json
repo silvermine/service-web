@@ -10,7 +10,7 @@
    },
    "scripts": {
       "prepare": "grunt build",
-      "test": "./node_modules/.bin/check-node-version --npm 6.13.4 && TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
+      "test": "./node_modules/.bin/check-node-version --npm 8.5.5 && TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
       "commitlint": "./node_modules/.bin/commitlint --from ac67b27",
       "standards": "npm run commitlint && grunt standards"
    },
@@ -24,10 +24,6 @@
       "url": "https://github.com/silvermine/service-web/issues"
    },
    "homepage": "https://github.com/silvermine/service-web#readme",
-   "engines": {
-      "node": ">=12.13.1",
-      "npm": "6.13.4"
-   },
    "devDependencies": {
       "@commitlint/cli": "8.3.5",
       "@commitlint/config-conventional": "8.3.4",
