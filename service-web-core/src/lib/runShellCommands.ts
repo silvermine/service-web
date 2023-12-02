@@ -48,14 +48,12 @@ export default async function runShellCommands(wd: string, cmds: string[], opts:
       concatenatedCommand,
       {
          cwd: wd,
+         stdio: 'inherit',
          // TODO: consider security implications:
          shell: true,
          env: env,
       }
    );
-
-   child.stdout.pipe(process.stdout);
-   child.stderr.pipe(process.stderr);
 
    return new Promise((resolve, reject) => {
       child.on('error', (err) => {
