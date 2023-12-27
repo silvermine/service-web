@@ -1,12 +1,18 @@
 import Service from '../../../service-web-core/src/model/Service';
 import Web from '../../../service-web-core/src/model/Web';
 
+export enum ListFormat {
+   Text = 'text',
+   JSON = 'json',
+}
+
 interface ListOptions {
    reverse: boolean;
    listDependencies: boolean;
    environmentGroup: string;
    environment: string;
    region: string;
+   format?: ListFormat;
 }
 
 function shouldList(svc: Service, opts: Partial<ListOptions>): boolean {
@@ -27,15 +33,29 @@ function shouldList(svc: Service, opts: Partial<ListOptions>): boolean {
 }
 
 export default function listServices(web: Web, opts: Partial<ListOptions>): void {
-   web.dependencyOrder(opts.reverse).forEach((svc) => {
-      if (!shouldList(svc, opts)) {
-         return;
-      }
-      console.info(svc.ID);
-      if (opts.listDependencies) {
-         svc.dependsOn(opts.reverse).forEach((dep) => {
-            console.info(`\t${dep.ID}`);
+   const services = web.dependencyOrder(opts.reverse).reduce((memo, svc) => {
+      if (shouldList(svc, opts)) {
+         memo.push({
+            id: svc.ID,
+            dependencies: svc.dependsOn(opts.reverse).map((dep) => {
+               return dep.ID;
+            }),
          });
       }
-   });
+
+      return memo;
+   }, [] as { id: string; dependencies: string[] }[]);
+
+   if (opts.format === ListFormat.JSON) {
+      console.info(JSON.stringify(services));
+   } else {
+      services.forEach((svc) => {
+         console.info(svc.id);
+         if (opts.listDependencies) {
+            svc.dependencies.forEach((depID) => {
+               console.info(`\t${depID}`);
+            });
+         }
+      });
+   }
 }
