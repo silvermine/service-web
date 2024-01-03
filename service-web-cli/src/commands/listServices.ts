@@ -1,3 +1,4 @@
+import { isEmpty } from '@silvermine/toolbox';
 import Service from '../../../service-web-core/src/model/Service';
 import Web from '../../../service-web-core/src/model/Web';
 
@@ -37,9 +38,18 @@ export default function listServices(web: Web, opts: Partial<ListOptions>): void
       if (shouldList(svc, opts)) {
          memo.push({
             id: svc.ID,
-            dependencies: svc.dependsOn(opts.reverse).map((dep) => {
-               return dep.ID;
-            }),
+            dependencies: svc.dependsOn(opts.reverse)
+               .filter((dep) => {
+                  if (!opts.environmentGroup || !dep.config.isRootDependency) {
+                     return true;
+                  }
+
+                  // Only return root dependencies that are deployed to the same env-group
+                  return !isEmpty(dep.deploymentTargetsFor(opts.environmentGroup));
+               })
+               .map((dep) => {
+                  return dep.ID;
+               }),
          });
       }
 
