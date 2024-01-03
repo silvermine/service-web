@@ -129,6 +129,7 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
 
       graph.overallOrder().forEach((svcID) => {
          const svc = graph.getNodeData(svcID),
+               svcEnvGroups = svc.getAllEnvironmentGroups(),
                dependencies = svc.config.dependsOn || [];
 
          dependencies.forEach((dependency) => {
@@ -137,6 +138,19 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
                   'Service',
                   svc.configPath,
                   `Service ${svcID} claims to depend on non-existent service ${dependency}`
+               );
+            }
+
+            const dep = graph.getNodeData(dependency),
+                  depEnvGroups = dep.getAllEnvironmentGroups(),
+                  svcDeployedToSameEnvGroupsAsDep = svcEnvGroups.every((envGroup) => { return depEnvGroups.includes(envGroup); });
+
+            if (!svcDeployedToSameEnvGroupsAsDep) {
+               throw new ConfigValidationError(
+                  'Service',
+                  svc.configPath,
+                  `Service ${svcID} depends on service ${dependency} across environment groups.`
+                     + ' The deployment ordering for this cannot be guaranteed.'
                );
             }
 
