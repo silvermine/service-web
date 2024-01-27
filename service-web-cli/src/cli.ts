@@ -1,4 +1,4 @@
-import { flatten, isEmpty } from '@silvermine/toolbox';
+import { flatten, isEmpty, isUndefined } from '@silvermine/toolbox';
 import { loadServiceWeb } from '../../service-web-core/src';
 import { createCommand, CommanderError } from 'commander';
 import { relative } from 'path';
@@ -14,6 +14,7 @@ import { DeploymentTargetConfig } from '../../service-web-core/src/config/schema
 import { ShellCommandError } from '../../service-web-core/src/lib/runShellCommands';
 import { version as packageVersion } from '../../package.json';
 import System from '../../service-web-core/src/model/System';
+import generateMermaidDeploymentGraph from './commands/generateMermaidDeploymentGraph';
 
 const program = createCommand();
 
@@ -152,6 +153,41 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
       .description('Generate a dependency graph for one or all services')
       .action(async (opts) => {
          return generateMermaidChart(web, opts.format, opts.service, opts.output);
+      });
+
+   program
+      .command('deploy-plan')
+      .description('Generates a deployment graph.')
+      .option('--all', 'Run this command for all services in the web')
+      .option('--output <filePath>', 'If you prefer the output is written to a file instead of stdout, supply a file path')
+      .action(async (cmd) => {
+         const opts = Object.assign({}, program.opts(), cmd.opts()),
+               standardOpts = getStandardOptions(),
+               envGroup = standardOpts.environmentGroup;
+
+         if (isEmpty(envGroup) || isUndefined(envGroup)) {
+            throw new InputError('Must provide --env-group option for this command to select any targets');
+         }
+
+         const services: Service[] = [];
+
+         if (opts.all || cmd.args.find((n: string) => { return n === '*'; })) {
+            services.push(...web.services);
+         } else {
+            cmd.args.forEach((name: string) => {
+               const svc = web.getServiceByName(name);
+
+               if (svc) {
+                  services.push(svc);
+               } else {
+                  throw new InputError(`No service with name "${name}" found in ${web.name} (${web.configPath})`);
+               }
+            });
+         }
+
+         return generateMermaidDeploymentGraph(web, envGroup, services, {
+            destPath: opts.output,
+         });
       });
 
    const commands = web.config.serviceTypes?.reduce((memo, st) => {
