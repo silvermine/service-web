@@ -59,7 +59,7 @@ export default class Service extends BaseUnit<ServiceConfig> {
          .map((dt) => { return dt.environmentGroup; });
    }
 
-   public async runNamedCommand(cmd: string, target: DeploymentTargetConfig): Promise<void> {
+   public async runNamedCommand(cmd: string, target: DeploymentTargetConfig, opts: { outputPrefix?: string } = {}): Promise<void> {
       return runShellCommands(this.rootDir, this._getCommands(cmd), {
          copyEnv: true,
          env: {
@@ -69,6 +69,7 @@ export default class Service extends BaseUnit<ServiceConfig> {
             SVC_WEB_ENV: target.environment,
             SVC_WEB_REGION: target.region,
          },
+         outputPrefix: opts.outputPrefix,
       });
    }
 
