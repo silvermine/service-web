@@ -60,14 +60,15 @@
       "typescript": "3.7.5"
    },
    "dependencies": {
-      "@silvermine/toolbox": "0.1.0",
+      "@silvermine/toolbox": "0.2.0",
       "ajv": "6.11.0",
       "commander": "6.1.0",
-      "dependency-graph": "0.8.1",
+      "dependency-graph": "1.0.0",
       "fast-glob": "3.1.1",
       "find-file-up": "2.0.1",
       "js-yaml": "3.13.1",
       "mermaid": "8.8.0",
+      "p-queue": "6.6.2",
       "tslib": "1.10.0"
    },
    "config": {

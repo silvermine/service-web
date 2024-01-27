@@ -24,6 +24,14 @@ export default class Service extends BaseUnit<ServiceConfig> {
       return this.system.web.dependenciesOf(this, reverse);
    }
 
+   public directlyDependsOn(): ReadonlyArray<Service> {
+      return this.system.web.directDependenciesOf(this);
+   }
+
+   public directDependents(): ReadonlyArray<Service> {
+      return this.system.web.directDependents(this);
+   }
+
    public deploymentTargetsFor(envGroup: string): ReadonlyArray<DeploymentTargetConfig> {
       return this._getAllDeploymentTargets().filter((dt) => {
          return dt.environmentGroup === envGroup;
