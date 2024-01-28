@@ -1,10 +1,12 @@
 /* eslint-disable no-process-env */
 import { spawn } from 'child_process';
 import { isNumber, isString, StringMap } from '@silvermine/toolbox';
+import ShellCommandOutputProcessor from './ShellCommandOutputProcessor';
 
 interface ShellCommandOptions {
    copyEnv?: boolean;
    env?: StringMap;
+   outputPrefix?: string;
 }
 
 export interface LogLocations {
@@ -48,12 +50,17 @@ export default async function runShellCommands(wd: string, cmds: string[], opts:
       concatenatedCommand,
       {
          cwd: wd,
-         stdio: 'inherit',
+         stdio: opts.outputPrefix ? 'pipe' : 'inherit',
          // TODO: consider security implications:
          shell: true,
          env: env,
       }
    );
+
+   if (opts.outputPrefix && child.stdout && child.stderr) {
+      child.stdout.pipe(new ShellCommandOutputProcessor(opts.outputPrefix)).pipe(process.stdout);
+      child.stderr.pipe(new ShellCommandOutputProcessor(opts.outputPrefix)).pipe(process.stderr);
+   }
 
    return new Promise((resolve, reject) => {
       child.on('error', (err) => {

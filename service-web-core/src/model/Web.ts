@@ -59,6 +59,10 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
       return reverse ? svcs.reverse() : svcs;
    }
 
+   public dependencyGraph(): DepGraph<Service> {
+      return this._computeCachedGraph().clone();
+   }
+
    public dependenciesOf(svc: Service, reverse = false): ReadonlyArray<Service> {
       const graph = this._computeCachedGraph();
 
@@ -67,6 +71,26 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
       });
 
       return reverse ? svcs.reverse() : svcs;
+   }
+
+   public directDependenciesOf(svc: Service): ReadonlyArray<Service> {
+      const graph = this._computeCachedGraph();
+
+      const svcs = graph.directDependenciesOf(svc.ID).map((svcID) => {
+         return graph.getNodeData(svcID);
+      });
+
+      return svcs;
+   }
+
+   public directDependents(svc: Service): ReadonlyArray<Service> {
+      const graph = this._computeCachedGraph();
+
+      const svcs = graph.directDependentsOf(svc.ID).map((svcID) => {
+         return graph.getNodeData(svcID);
+      });
+
+      return svcs;
    }
 
    public getServiceFromDirectory(dir: string): Service | undefined {

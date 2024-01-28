@@ -1,4 +1,4 @@
-import { flatten, isEmpty } from '@silvermine/toolbox';
+import { flatten, isEmpty, isNumber, isUndefined } from '@silvermine/toolbox';
 import { loadServiceWeb } from '../../service-web-core/src';
 import { createCommand, CommanderError } from 'commander';
 import { relative } from 'path';
@@ -14,6 +14,7 @@ import { DeploymentTargetConfig } from '../../service-web-core/src/config/schema
 import { ShellCommandError } from '../../service-web-core/src/lib/runShellCommands';
 import { version as packageVersion } from '../../package.json';
 import System from '../../service-web-core/src/model/System';
+import generateMermaidDeploymentGraph from './commands/generateMermaidDeploymentGraph';
 
 const program = createCommand();
 
@@ -61,6 +62,7 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
       .option('--with-deps', 'Add services that are dependencies of those you\'re running the command on')
       .option('--exact-order', 'Do not do any sorting. Deploy services in the order specified. Only used when service names are specified as arguments.') // eslint-disable-line max-len
       .option('--start-at <service>', 'Start at a given service, skipping all that come before it. Useful for restarting a command that failed part way through.') // eslint-disable-line max-len
+      .option('--parallel <concurrency>', 'Deploy multiple services in parallel when possible.')
       .action(async (cmd) => {
          const opts = Object.assign({}, program.opts(), cmd.opts()),
                standardOpts = getStandardOptions();
@@ -69,11 +71,12 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
             addDependencies: Boolean(opts.withDeps),
             reverse: Boolean(opts.reverse),
             skipSort: Boolean(opts.exactOrder),
+            parallel: opts.parallel ? Number(opts.parallel) : undefined,
          };
 
-         if (commandOpts.skipSort && (opts.all || isEmpty(cmd.args) || commandOpts.addDependencies)) {
+         if (commandOpts.skipSort && (opts.all || isEmpty(cmd.args) || commandOpts.addDependencies || commandOpts.parallel)) {
             throw new InputError(
-               '--exact-order only allowed when specifying service names, and not allowed with --with-deps or --all'
+               '--exact-order only allowed when specifying service names, and not allowed with --with-deps, --all, or --parallel'
             );
          }
 
@@ -154,6 +157,41 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
          return generateMermaidChart(web, opts.format, opts.service, opts.output);
       });
 
+   program
+      .command('deploy-plan')
+      .description('Generates a deployment graph.')
+      .option('--all', 'Run this command for all services in the web')
+      .option('--output <filePath>', 'If you prefer the output is written to a file instead of stdout, supply a file path')
+      .action(async (cmd) => {
+         const opts = Object.assign({}, program.opts(), cmd.opts()),
+               standardOpts = getStandardOptions(),
+               envGroup = standardOpts.environmentGroup;
+
+         if (isEmpty(envGroup) || isUndefined(envGroup)) {
+            throw new InputError('Must provide --env-group option for this command to select any targets');
+         }
+
+         const services: Service[] = [];
+
+         if (opts.all || cmd.args.find((n: string) => { return n === '*'; })) {
+            services.push(...web.services);
+         } else {
+            cmd.args.forEach((name: string) => {
+               const svc = web.getServiceByName(name);
+
+               if (svc) {
+                  services.push(svc);
+               } else {
+                  throw new InputError(`No service with name "${name}" found in ${web.name} (${web.configPath})`);
+               }
+            });
+         }
+
+         return generateMermaidDeploymentGraph(web, envGroup, services, {
+            destPath: opts.output,
+         });
+      });
+
    const commands = web.config.serviceTypes?.reduce((memo, st) => {
       Object.keys(st.commands).forEach((cmd) => {
          if (!memo.includes(cmd) && !/^(before|after):/.test(cmd)) {
@@ -182,10 +220,28 @@ function addDeploymentTargetBasedCommand(web: Web, cmdName: string, desc: string
 
       addDeploymentTargetBasedCommand(web, cmdName, desc, async (s: Service, t: DeploymentTargetConfig, p) => {
          console.info(`Running ${cmdName} for ${s.ID} in ${t.region}:${t.environmentGroup}:${t.environment}`);
-         console.info(`Progress: Service ${p.currentService} of ${p.totalServices} | Target ${p.currentTarget} of ${p.totalTargets}`);
+
+         const statusParts = [
+            `Progress: Service ${p.currentService} of ${p.totalServices}`,
+            `Target ${p.currentTarget} of ${p.totalTargets}`,
+         ];
+
+         const isRunningInParallel = isNumber(p.queuedProcesses) && isNumber(p.unqueuedProcesses);
+
+         if (isRunningInParallel) {
+            statusParts.push(`Queued: ${p.queuedProcesses}; Unqueued: ${p.unqueuedProcesses}`);
+         }
+
+         console.info(statusParts.join(' | '));
 
          try {
-            await s.runNamedCommand(cmdName, t);
+            const prefix = `${s.system.name}:${s.name}\t${t.environmentGroup}:${t.environment}:${t.region}\t`;
+
+            await s.runNamedCommand(cmdName, t, {
+               // add a prefix to the output when multiple commands are run in parallel to
+               // allow users to regroup the logs if needed
+               outputPrefix: isRunningInParallel ? prefix : undefined,
+            });
          } catch(err) {
             if (err instanceof ShellCommandError) {
                console.error(`Error running ${cmdName} for ${s.ID}: ${err}\n${err.stack}`);

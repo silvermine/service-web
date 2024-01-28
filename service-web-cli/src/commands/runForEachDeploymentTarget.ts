@@ -6,12 +6,15 @@ import { ServiceListOptions } from '../../../service-web-core/src/lib/makeServic
 import { StandardOptions } from '../cli';
 import { DeploymentTargetConfig } from '../../../service-web-core/src/config/schemas/auto-generated-types';
 import InputError from '../InputError';
+import { DeploymentGraph } from '../../../service-web-core/src/lib/DeploymentGraph';
 
 interface Progress {
    totalServices: number;
    currentService: number;
    totalTargets: number;
    currentTarget: number;
+   queuedProcesses?: number;
+   unqueuedProcesses?: number;
 }
 
 export interface Runner {
@@ -20,6 +23,7 @@ export interface Runner {
 
 export interface RunForEachDeploymentTargetOptions extends ServiceListOptions, StandardOptions {
    startAtService?: string;
+   parallel?: number;
 }
 
 function filterTargets(opts: StandardOptions, tc: DeploymentTargetConfig): boolean {
@@ -56,53 +60,88 @@ export default async function runForEachDeploymentTarget(web: Web, serviceNames:
       });
    }
 
-   let skipping = !!opts.startAtService,
-       totalServices = 0,
-       currentService = 0,
-       currentTarget = 0,
-       lastService: Service | undefined;
+   if (opts.parallel && opts.parallel > 1) {
+      const deploymentGraph = new DeploymentGraph(web, services, opts.environmentGroup || '');
 
-   const flatChain = makeDeploymentChain(web, opts.environmentGroup || '', services, opts)
-      .reduce((memo, link) => {
-         link.targets.filter(filterTargets.bind(null, opts)).forEach((t) => {
-            memo.push([ link.service, t ]);
+      if (opts.startAtService) {
+         deploymentGraph.pruneDependenciesOf(opts.startAtService).forEach((svcID) => {
+            console.info(`Skipping ${svcID} - will not start until ${opts.startAtService}`);
          });
-         return memo;
-      }, [] as [ Service, DeploymentTargetConfig ][])
-      .filter(([ svc ]) => {
-         if (skipping) {
-            if (svc.ID === opts.startAtService || svc.name === opts.startAtService) {
-               skipping = false;
-               totalServices = totalServices + 1;
+      }
+
+      const servicesToDeploy = deploymentGraph.services(),
+            totalServices = servicesToDeploy.length;
+
+      const totalTargets = servicesToDeploy.reduce((memo, svc) => {
+         return memo + svc.deploymentTargetsFor(opts.environmentGroup || '').filter(filterTargets.bind(null, opts)).length;
+      }, 0);
+
+      let currentService = 0,
+          currentTarget = 0;
+
+      await deploymentGraph.walk(async (svc, targets) => {
+         targets = targets.filter(filterTargets.bind(null, opts));
+
+         currentService = currentService + 1;
+         for (const target of targets) {
+            currentTarget = currentTarget + 1;
+            await runner(svc, target, {
+               currentService,
+               totalServices,
+               currentTarget,
+               totalTargets,
+               queuedProcesses: deploymentGraph.stats().pending,
+               unqueuedProcesses: deploymentGraph.stats().unstarted,
+            });
+         }
+      }, { concurrency: opts.parallel });
+   } else {
+      let skipping = !!opts.startAtService,
+          totalServices = 0,
+          currentService = 0,
+          currentTarget = 0,
+          lastService: Service | undefined;
+
+      const flatChain = makeDeploymentChain(web, opts.environmentGroup || '', services, opts)
+         .reduce((memo, link) => {
+            link.targets.filter(filterTargets.bind(null, opts)).forEach((t) => {
+               memo.push([ link.service, t ]);
+            });
+            return memo;
+         }, [] as [ Service, DeploymentTargetConfig ][])
+         .filter(([ svc ]) => {
+            if (skipping) {
+               if (svc.ID === opts.startAtService || svc.name === opts.startAtService) {
+                  skipping = false;
+                  totalServices = totalServices + 1;
+                  lastService = svc;
+                  return true;
+               }
+               if (lastService !== svc) {
+                  console.info(`Skipping ${svc.ID} - will not start until ${opts.startAtService}`);
+               }
                lastService = svc;
-               return true;
+               return false;
             }
             if (lastService !== svc) {
-               console.info(`Skipping ${svc.ID} - will not start until ${opts.startAtService}`);
+               totalServices = totalServices + 1;
             }
             lastService = svc;
-            return false;
-         }
-         if (lastService !== svc) {
-            totalServices = totalServices + 1;
-         }
-         lastService = svc;
-         return true;
-      });
+            return true;
+         });
 
-   lastService = undefined;
-
-   for (let link of flatChain) {
-      if (lastService !== link[0]) {
-         currentService = currentService + 1;
+      for (let link of flatChain) {
+         if (lastService !== link[0]) {
+            currentService = currentService + 1;
+         }
+         currentTarget = currentTarget + 1;
+         lastService = link[0];
+         await runner(link[0], link[1], {
+            currentService,
+            totalServices,
+            currentTarget,
+            totalTargets: flatChain.length,
+         });
       }
-      currentTarget = currentTarget + 1;
-      lastService = link[0];
-      await runner(link[0], link[1], {
-         currentService,
-         totalServices,
-         currentTarget,
-         totalTargets: flatChain.length,
-      });
    }
 }
