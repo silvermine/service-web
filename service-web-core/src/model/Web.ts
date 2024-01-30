@@ -154,6 +154,15 @@ export default class Web extends BaseUnit<ServiceWebConfig> {
                );
             }
 
+            if (!svc.config.isRootDependency && dep.config.isRootDependency) {
+               throw new ConfigValidationError(
+                  'Service',
+                  svc.configPath,
+                  `The non-root dependency service ${svcID} explicitly depends on the root dependency service ${dependency}.`
+                     + ' This dependency already exists implicitly and should not be explicitly defined.'
+               );
+            }
+
             graph.addDependency(svcID, dependency);
          });
       });
