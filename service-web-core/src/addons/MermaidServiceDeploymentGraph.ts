@@ -21,7 +21,11 @@ export default class MermaidServiceDeploymentGraph {
          const rootSubGraph: string[] = [];
 
          const addService = (isSkipped: boolean, svc: Service, dependents: readonly Service[]): void => {
-            if (isEmpty(svc.config.dependsOn) && !svc.config.isRootDependency) {
+            const onlyDependsOnRootDeps = isEmpty(svc.config.dependsOn) || svc.config.dependsOn?.every((dep) => {
+               return this._web.getServiceByName(dep)?.config.isRootDependency;
+            });
+
+            if (onlyDependsOnRootDeps && !svc.config.isRootDependency) {
                this._addLine(`${this._getLabel(svc)}${isSkipped ? ':::skipped' : ''} --> rootDeps`);
             }
 
