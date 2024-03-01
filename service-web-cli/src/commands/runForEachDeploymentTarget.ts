@@ -130,6 +130,8 @@ export default async function runForEachDeploymentTarget(web: Web, serviceNames:
             return true;
          });
 
+      lastService = undefined;
+
       for (let link of flatChain) {
          if (lastService !== link[0]) {
             currentService = currentService + 1;
