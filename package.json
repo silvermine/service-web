@@ -10,9 +10,9 @@
    },
    "scripts": {
       "prepare": "grunt build",
-      "test": "npm run check-node-version && TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
+      "test": "TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
       "commitlint": "./node_modules/.bin/commitlint --from ac67b27",
-      "check-node-version": "check-node-version --npm 8.5.5",
+      "check-node-version": "check-node-version --npm 10.5.0",
       "eslint": "eslint .",
       "markdownlint": "markdownlint -c .markdownlint.json -i CHANGELOG.md '{,!(node_modules)/**/}*.md'",
       "standards": "npm run commitlint && npm run markdownlint && npm run eslint",
@@ -60,7 +60,7 @@
       "typescript": "3.7.5"
    },
    "dependencies": {
-      "@silvermine/toolbox": "0.2.0",
+      "@silvermine/toolbox": "github:silvermine/toolbox#1df137008ddb3e8e929350489f6cc4a892e44e64",
       "ajv": "6.11.0",
       "commander": "6.1.0",
       "dependency-graph": "1.0.0",
