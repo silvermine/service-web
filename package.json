@@ -10,7 +10,7 @@
    },
    "scripts": {
       "prepare": "grunt build",
-      "test": "npm run check-node-version && TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
+      "test": "TS_NODE_PROJECT='tests/tsconfig.json' TS_NODE_FILES=true nyc mocha --opts ./.mocha.opts",
       "commitlint": "./node_modules/.bin/commitlint --from ac67b27",
       "check-node-version": "check-node-version --npm 10.5.0",
       "eslint": "eslint .",
